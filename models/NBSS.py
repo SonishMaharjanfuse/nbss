@@ -27,7 +27,7 @@ class NBSS(pl.LightningModule):
         self,
         arch: nn.Module,
         io: NBIO,
-        speaker_num: int = 2,
+        speaker_num: int = 4,
         ref_channel: int = 0,
         channels: List[int] = [0, 1, 2, 3, 4, 5, 6, 7],
         learning_rate: float = 0.001,

@@ -192,7 +192,7 @@ def generate_rir_cfg_list(spk_num=2,
                 return cfg
 
     assert array_type == 'circular', "only supports circular array for now"
-    assert spk_num == 2, "Only supports 2-speaker cases"
+    # assert spk_num == 2, "Only supports 2-speaker cases"
 
     rir_pars = []
     pbar = tqdm.tqdm(total=rir_num)
@@ -375,11 +375,11 @@ if __name__ == '__main__':
     parser.add_argument('--rir_dir', default='dataset/rir_cfg_4', type=str, help='the dir of rirs')
     parser.add_argument('--rir_cfg_file', default='configs/rir_cfg_4.json', type=str, help='rir cfg file')
 
-    parser.add_argument('--train_num', default=20000, type=int, help='num of rirs for train set')
-    parser.add_argument('--validation_num', default=5000, type=int, help='num of rirs for validation set')
-    parser.add_argument('--test_num', default=3000, type=int, help='num of rirs for test set')
+    parser.add_argument('--train_num', default=20, type=int, help='num of rirs for train set')
+    parser.add_argument('--validation_num', default=5, type=int, help='num of rirs for validation set')
+    parser.add_argument('--test_num', default=3, type=int, help='num of rirs for test set')
 
-    parser.add_argument('--spk', default=2, type=int, help='num of speakers (default: 2)')
+    parser.add_argument('--spk', default=4, type=int, help='num of speakers (default: 2)')
     parser.add_argument('--mic', default=8, type=int, help='num of mics (default: 8)')
 
     args = parser.parse_args()
@@ -393,5 +393,5 @@ if __name__ == '__main__':
     validation_num = args.validation_num
     test_num = args.test_num
 
-    rir_cfg = generate_rir_cfg_list(mic_num=mic, rir_num=train_num + validation_num + test_num, save_to=rir_cfg_file)
+    rir_cfg = generate_rir_cfg_list(spk_num=spk, mic_num=mic, rir_num=train_num + validation_num + test_num, save_to=rir_cfg_file)
     generate_rir_files(rir_cfg, rir_dir, train_num=train_num, validation_num=validation_num, test_num=test_num)

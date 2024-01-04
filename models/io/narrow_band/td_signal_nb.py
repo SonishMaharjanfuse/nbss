@@ -110,6 +110,7 @@ class TimeDomainSignalNB(STFTCoefficientNB):
             loss value(s), shape [batch] if reduce_batch==False, else a single value
             perms: returned by pit
         """
+        print(preds.shape,target.shape)
         losses, perms = pit(preds=preds, target=target, metric_func=self.loss_func, eval_func='min')
         if reduce_batch:
             return losses.mean(), perms

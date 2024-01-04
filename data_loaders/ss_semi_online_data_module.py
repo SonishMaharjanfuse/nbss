@@ -124,8 +124,8 @@ class SS_SemiOnlineDataModule(LightningDataModule):
             self.rirs[sub_dir] = files_full_path
 
         # wsj0-mix
-        if self.clean_speech_dataset == 'wsj0-mix' or self.clean_speech_dataset == 'wsj0-mix-4spk':
-            spk1_cfgs, spk2_cfgs = SS_SemiOnlineDataModule.prepare_data_wsj0_mix(f'configs/wsj0-mix')
+        if self.clean_speech_dataset == 'wsj0' or self.clean_speech_dataset == 'wsj0-mix-4spk':
+            spk1_cfgs, spk2_cfgs, spk3_cfgs, spk4_cfgs = SS_SemiOnlineDataModule.prepare_data_wsj0_mix(f'configs/wsj0-mix')
         # relative path to absolute path
         for ds in ['train', 'validation', 'test']:
             ds_cfg = spk1_cfgs[ds]
@@ -134,8 +134,17 @@ class SS_SemiOnlineDataModule(LightningDataModule):
             ds_cfg = spk2_cfgs[ds]
             for cfg in ds_cfg:
                 cfg['wav'] = os.path.join(self.clean_speech_dir, cfg['wav'])
+            ds_cfg = spk3_cfgs[ds]
+            for cfg in ds_cfg:
+                cfg['wav'] = os.path.join(self.clean_speech_dir, cfg['wav'])
+            ds_cfg = spk4_cfgs[ds]
+            for cfg in ds_cfg:
+                cfg['wav'] = os.path.join(self.clean_speech_dir, cfg['wav'])
+
         self.spk1_cfgs = spk1_cfgs
         self.spk2_cfgs = spk2_cfgs
+        self.spk3_cfgs = spk3_cfgs
+        self.spk4_cfgs = spk4_cfgs
 
     @staticmethod
     def prepare_data_wsj0_mix(config_dir: str,) -> Tuple[Dict[str, List[Dict[str, str]]], Dict[str, List[Dict[str, str]]]]:
@@ -165,47 +174,66 @@ class SS_SemiOnlineDataModule(LightningDataModule):
             f.close()
             spk1_cfgs = wav_cfg['spk1_cfgs']
             spk2_cfgs = wav_cfg['spk2_cfgs']
+            spk3_cfgs = wav_cfg['spk3_cfgs']
+            spk4_cfgs = wav_cfg['spk4_cfgs']
         else:
             # cal wav cfgs
             spk1_cfgs = {}
             spk2_cfgs = {}
+            spk3_cfgs = {}
+            spk4_cfgs = {}
 
             genders = pd.read_csv(f'{config_dir}/speaker_gender.csv', delim_whitespace=True)
             genders.sort_values(by='ID', inplace=True)
 
             for key, dataset in {'train': 'tr', 'validation': 'cv', 'test': 'tt'}.items():
-                df = pd.read_csv(f'{config_dir}/mix_2_spk_' + dataset + '.txt', delim_whitespace=True, names=['wav_file1', 'scale1', 'wav_file2', 'scale2'])
+                df = pd.read_csv(f'{config_dir}/mix_4_spk_' + dataset + '.txt', delim_whitespace=True, names=['wav_file1', 'scale1', 'wav_file2', 'scale2','wav_file3', 'scale3', 'wav_file4', 'scale4'])
                 num_files = df.shape[0]
 
                 spk1_cfg = []
                 spk2_cfg = []
+                spk3_cfg = []
+                spk4_cfg = []
                 for i in range(num_files):
                     dfi = df.iloc[i]
 
-                    inwav1_name, inwav2_name = dfi[0], dfi[2]  #'wsj0/si_tr_s/40n/40na010x.wav'
-                    inwav1_snr, inwav2_snr = dfi[1], dfi[3]
+                    inwav1_name, inwav2_name, inwav3_name, inwav4_name = dfi[0], dfi[2], dfi[4], dfi[6]  #'wsj0/si_tr_s/40n/40na010x.wav'
+                    inwav1_snr, inwav2_snr, inwav3_snr,inwav4_snr = dfi[1], dfi[3], dfi[5], dfi[7]
                     spk_name1 = inwav1_name.split('/')[3][0:3]
                     spk_name2 = inwav2_name.split('/')[3][0:3]
+                    spk_name3 = inwav3_name.split('/')[3][0:3]
+                    spk_name4 = inwav4_name.split('/')[3][0:3]
 
                     gender_i1 = genders.ID.values.searchsorted(spk_name1, side='left')
                     gender_i2 = genders.ID.values.searchsorted(spk_name2, side='left')
+                    gender_i3 = genders.ID.values.searchsorted(spk_name3, side='left')
+                    gender_i4 = genders.ID.values.searchsorted(spk_name4, side='left')
 
                     gender1 = genders.iloc[gender_i1, 1]
                     gender2 = genders.iloc[gender_i2, 1]
+                    gender3 = genders.iloc[gender_i3, 1]
+                    gender4 = genders.iloc[gender_i4, 1]
 
                     assert spk_name1 == genders.iloc[gender_i1, 0], 'error1'
                     assert spk_name2 == genders.iloc[gender_i2, 0], 'error1'
+                    assert spk_name3 == genders.iloc[gender_i3, 0], 'error1'
+                    assert spk_name4 == genders.iloc[gender_i4, 0], 'error1'
 
-                    spk1_cfg.append({'wav': inwav1_name, 'speaker': spk_name1, 'gender': gender1, 'dataset': f"wsj0-mix/{key}"})
-                    spk2_cfg.append({'wav': inwav2_name, 'speaker': spk_name2, 'gender': gender2, 'dataset': f"wsj0-mix/{key}"})
+                    spk1_cfg.append({'wav': inwav1_name, 'speaker': spk_name1, 'gender': gender1, 'dataset': f"wsj0/{key}"})
+                    spk2_cfg.append({'wav': inwav2_name, 'speaker': spk_name2, 'gender': gender2, 'dataset': f"wsj0/{key}"})
+                    spk3_cfg.append({'wav': inwav3_name, 'speaker': spk_name3, 'gender': gender3, 'dataset': f"wsj0/{key}"})
+                    spk4_cfg.append({'wav': inwav4_name, 'speaker': spk_name4, 'gender': gender4, 'dataset': f"wsj0/{key}"})
+                # print(spk3_cfg)
                 spk1_cfgs[key] = spk1_cfg
                 spk2_cfgs[key] = spk2_cfg
+                spk3_cfgs[key] = spk3_cfg
+                spk4_cfgs[key] = spk4_cfg
             rank_zero_info(f'write wav configuration to {wav_cfg_path}')
             f = open(wav_cfg_path, 'w', encoding='utf-8')
-            json.dump({'spk1_cfgs': spk1_cfgs, 'spk2_cfgs': spk2_cfgs}, f, indent=4)
+            json.dump({'spk1_cfgs': spk1_cfgs, 'spk2_cfgs': spk2_cfgs, 'spk3_cfgs': spk3_cfgs, 'spk4_cfgs': spk4_cfgs}, f, indent=4)
             f.close()
 
-        return spk1_cfgs, spk2_cfgs
+        return spk1_cfgs, spk2_cfgs, spk3_cfgs, spk4_cfgs
 
     def setup(self, stage=None):
         if stage is not None and stage == 'test':
@@ -252,21 +280,21 @@ class SS_SemiOnlineDataModule(LightningDataModule):
                 )
             else:
                 self.train = SS_SemiOnlineDataset(
-                    speeches=[self.spk1_cfgs['train'], self.spk2_cfgs['train']],
+                    speeches=[self.spk1_cfgs['train'], self.spk2_cfgs['train'], self.spk3_cfgs['train'], self.spk4_cfgs['train']],
                     rirs=self.rirs['train'],
                     speech_overlap_ratio=self.speech_overlap_ratio,
                     speech_scale=self.speech_scale,
                     audio_time_len=self.audio_time_len,
                 )
             self.val = SS_SemiOnlineDataset(
-                speeches=[self.spk1_cfgs['validation'], self.spk2_cfgs['validation']],
+                speeches=[self.spk1_cfgs['validation'], self.spk2_cfgs['validation'], self.spk3_cfgs['validation'], self.spk4_cfgs['validation']],
                 rirs=self.rirs['validation'],
                 speech_overlap_ratio=self.speech_overlap_ratio,
                 speech_scale=self.speech_scale,
                 audio_time_len=self.audio_time_len_for_val,
             )
             self.test = SS_SemiOnlineDataset(
-                speeches=[self.spk1_cfgs['test'], self.spk2_cfgs['test']],
+                speeches=[self.spk1_cfgs['test'], self.spk2_cfgs['test'], self.spk3_cfgs['test'], self.spk4_cfgs['test']],
                 rirs=self.rirs['test'],
                 speech_overlap_ratio=self.speech_overlap_ratio,
                 speech_scale=self.speech_scale,
