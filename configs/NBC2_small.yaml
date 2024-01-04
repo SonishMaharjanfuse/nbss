@@ -44,7 +44,7 @@ data:
   init_args:
     clean_speech_dataset: wsj0-2mix
     clean_speech_dir: /kaggle/input/wsj0-2mix/
-    rir_dir: /kaggle/woring/dataset/rir_cfg_4
+    rir_dir: /kaggle/working/nbss/dataset/rir_cfg_4
     speech_overlap_ratio:
     - 0.1
     - 1.0
