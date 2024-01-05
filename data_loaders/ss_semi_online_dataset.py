@@ -285,6 +285,8 @@ class SS_SemiOnlineDataset(Dataset):
             "index": sidx,
             "spk1": self.speeches[0][sidx],
             "spk2": self.speeches[1][sidx],
+            "spk3": self.speeches[2][sidx],
+            "spk4": self.speeches[3][sidx],
             'seed': index['seed'],
             'rir_file': self.rirs[ridx],
             'rir': rir_info,
