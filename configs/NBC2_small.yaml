@@ -56,9 +56,9 @@ data:
     - 4
     speaker_num: 4
     audio_time_len:
-    - nmix 5
-    - nmix 5
-    - nmix 5
+    - mid 5
+    - mid 5
+    - mid 5
     num_workers: 5
     test_set: test
     shuffle_train_rir: true
